@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="author" content="Darko Vlajkovic">
+  <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
+  <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" />
+  <link href="css/main.css" rel="stylesheet" />
+  <link href="css/custom-styles.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    .inner-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .input-field {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .info {
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #000; /* Crna boja za tekst */
+    }
+    .school-info-container {
+      width: 100%;
+      margin-top: 20px; /* Dodaje prostor ispod search bara */
+    }
+    .school-info {
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+    .school-info img {
+      display: block;
+      margin: 20px auto;
+      max-width: 200px;
+      border-radius: 5px;
+    }
+    .school-info h2 {
+      font-size: 1.5em;
+      color: #000000;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .intro-text {
+      font-size: 1em;
+      color: #555;
+    }
+    .contact-info {
+      font-size: 1em;
+      color: #100505;
+      text-align: left;
+    }
+    .contact-info p {
+      margin: 5px 0;
+    }
+    .contact-info .label {
+      font-weight: bold;
+    }
+    .contact-info .value {
+      font-weight: normal;
+    }
+
+    /* Media Queries for Responsive Design */
+    @media (max-width: 768px) {
+      .input-field, .info, .school-info {
+        width: 90%;
+        padding: 15px;
+      }
+      .school-info h2 {
+        font-size: 1.2em;
+      }
+      .contact-info {
+        font-size: 0.9em;
+      }
+      .contact-info p {
+        margin: 3px 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .input-field, .info, .school-info {
+        width: 100%;
+        padding: 10px;
+      }
+      .school-info h2 {
+        font-size: 1em;
+      }
+      .contact-info {
+        font-size: 0.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="s130">
+    <form>
+      <div class="inner-form">
+        <div class="input-field first-wrap">
+          <div class="svg-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+            </svg>
+          </div>
+          <input id="search" type="text" placeholder="Унесите вашу улицу" />
+        </div>
+        <div class="input-field second-wrap">
+          <button class="btn-search" type="button">ПРЕТРАЖИ</button>
+        </div>
+        <span class="info" style="color: black;">(Пример улице: Масарикова, Доситејева, Краља Милана...)</span>
+        <div class="school-info-container">
+          <div class="school-info" style="display:none;">
+            <p class="intro-text">На основу унетог назива улице, ваше дете треба да иде у следећу школу:</p>
+            <h2 id="skola"></h2>
+            <img id="slikaSkole" src="" alt="Слика школе" />
+            <div class="contact-info">
+             <h2><span class="label">Контакт подаци школе:</span></h2>
+              <p><span class="label">Телефон:</span> <span class="value" id="telefon"></span></p>
+              <p><span class="label">Адреса:</span> <span class="value" id="adresa"></span></p>
+              <p><span class="label">Е-маил:</span> <span class="value" id="email"></span></p>
+              <p><span class="label">Вебсајт:</span> <a class="value" href="#" target="_blank" id="sajt"></a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  <script src="js/extention/choices.js"></script>
+  <script>
+    // Funkcija za učitavanje CSV fajla i parsiranje
+    function loadCSV() {
+      return new Promise((resolve, reject) => {
+        Papa.parse('ulice.csv', {
+          download: true,
+          header: false,
+          complete: function(results) {
+            console.log("CSV file loaded:", results.data); // Debugging
+            const data = results.data.slice(1).map(row => ({
+              label: row[0],
+              value: row[1],
+              img: row[2],
+              tel: row[3],
+              addr: row[4],
+              email: row[5],
+              web: row[6]
+            }));
+            console.log("Parsed data:", data); // Debugging
+            resolve(data);
+          },
+          error: function(error) {
+            reject(error);
+          }
+        });
+      });
+    }
+
+    // Funkcija za transliteraciju unosa sa latinice на ćirilicu
+    function transliterate(str) {
+      const map = {
+        'a': 'а', 'b': 'б', 'c': 'ц', 'č': 'ч', 'ć': 'ћ', 'd': 'д', 'dž': 'џ', 'đ': 'ђ', 'e': 'е', 'f': 'ф',
+        'g': 'г', 'h': 'х', 'i': 'и', 'j': 'ј', 'k': 'к', 'l': 'л', 'lj': 'љ', 'm': 'м', 'n': 'н', 'nj': 'њ',
+        'o': 'о', 'p': 'п', 'r': 'р', 's': 'с', 'š': 'ш', 't': 'т', 'u': 'у', 'v': 'в', 'z': 'з', 'ž': 'ж'
+      };
+      return str.split('').map(char => map[char.toLowerCase()] || char).join('');
+    }
+
+    // Inicijalizacija autocomplete-a након учитавaња CSV података
+    $(document).ready(function() {
+      loadCSV().then(uliceISkole => {
+        const availableTags = uliceISkole;
+
+        console.log("Available tags:", availableTags); // Debugging
+
+        $("#search").autocomplete({
+          source: function(request, response) {
+            const transliteratedTerm = transliterate(request.term.toLowerCase());
+            console.log("Transliterated term:", transliteratedTerm); // Debugging
+            const results = availableTags.filter(tag => tag.label.toLowerCase().includes(transliteratedTerm));
+            console.log("Filtered results:", results); // Debugging
+            response(results);
+          },
+          select: function(event, ui) {
+            console.log("Selected item:", ui.item); // Debugging
+            $("#search").val(ui.item.label);
+            $("#skola").text(ui.item.value);
+            $("#slikaSkole").attr("src", ui.item.img);
+            $("#telefon").text(ui.item.tel);
+            $("#adresa").text(ui.item.addr);
+            $("#email").text(ui.item.email);
+            
+            let websiteUrl = ui.item.web;
+            if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+                websiteUrl = 'https://' + websiteUrl;
+            }
+            $("#sajt").attr("href", websiteUrl).text(ui.item.web);
+            
+            $(".school-info").show();
+            return false;
+          }
+        });
+      }).catch(error => {
+        console.error("Error loading CSV file:", error);
+      });
+    });
+  </script>
+</body>
+</html>

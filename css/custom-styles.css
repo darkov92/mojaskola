@@ -1,0 +1,26 @@
+.school-info-container {
+  width: 100%;
+  margin-top: 20px; /* Dodaje prostor ispod search bara */
+}
+
+.school-info {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.school-info img {
+  display: block;
+  margin: 10px auto;
+  max-width: 200px;
+  border-radius: 5px;
+}
+
+.school-info p {
+  margin: 10px 0;
+  font-size: 1.2em;
+  color: #0c0000;
+}
